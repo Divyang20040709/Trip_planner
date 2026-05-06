@@ -50,7 +50,7 @@ st.markdown("""
 
 # API Key check
 try:
-    api_key = st.secrets["GEMINI_API_KEY"]
+    api_key = st.secrets.get("GEMINI_API_KEY")
 except KeyError:
     st.error("❌ Gemini API Key not found. Please add it to your Streamlit Secrets.")
     st.stop()
