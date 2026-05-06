@@ -1,13 +1,8 @@
-import os
 import io
 from PIL import Image
-from dotenv import load_dotenv
 import streamlit as st
 from google import genai
 from google.genai import types
-
-# Load environment variables
-load_dotenv()
 
 # Page configuration
 st.set_page_config(
@@ -54,9 +49,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # API Key check
-api_key = os.getenv("GEMINI_API_KEY")
-if not api_key:
-    st.error("❌ Gemini API Key not found. Please check your .env file.")
+try:
+    api_key = st.secrets["GEMINI_API_KEY"]
+except KeyError:
+    st.error("❌ Gemini API Key not found. Please add it to your Streamlit Secrets.")
     st.stop()
 
 # Initialize Gemini Client
