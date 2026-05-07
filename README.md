@@ -1,65 +1,174 @@
-# 💊 MediScan AI: Prescription Analysis Assistant
+# ✈️ Trip Planner AI
 
-MediScan AI is a powerful, user-friendly Streamlit application designed to help users understand doctor prescriptions. By utilizing the cutting-edge **Google Gemini 3 Flash** multimodal AI, the app extracts and explains medical information from uploaded prescription images.
-
-## 🚀 Features
-
-- **OCR-Based Medicine Extraction**: Automatically identifies medicine names from handwritten or printed prescriptions.
-- **Detailed Insights**: Provides clear explanations for each medicine, including:
-  - **Uses**: What the medication is for.
-  - **Side Effects**: Common reactions to watch out for.
-  - **Dosage**: Recommended frequency (if visible).
-  - **Warnings**: Important safety information.
-- **Premium UI/UX**:
-  - Modern, responsive interface with a medical-themed design.
-  - Live image previews of uploaded documents.
-  - Interactive status trackers and collapsible analysis results.
-  - Sidebar for easy instructions and safety disclaimers.
-- **Secure Configuration**: Uses environment variables (`.env`) to protect API keys.
-
-## 🛠️ Technology Stack
-
-- **Frontend**: [Streamlit](https://streamlit.io/)
-- **AI Engine**: [Google Gemini 3 Flash Preview](https://deepmind.google/technologies/gemini/)
-- **Programming Language**: Python 3.x
-- **Key Libraries**: 
-  - `google-genai`: For AI model interaction.
-  - `Pillow`: For image processing and previews.
-  - `python-dotenv`: For secure environment variable management.
-
-## 📋 Installation & Setup
-
-1. **Clone the Repository**:
-   ```bash
-   git clone <repository-url>
-   cd prescription_reader
-   ```
-
-2. **Install Dependencies**:
-   ```bash
-   pip install streamlit google-genai pillow python-dotenv
-   ```
-
-3. **Configure API Key**:
-   Create a `.env` file in the root directory and add your Gemini API key:
-   ```env
-   GEMINI_API_KEY=your_actual_api_key_here
-   ```
-
-4. **Git Ignore**:
-   Ensure your `.gitignore` includes the `.env` file to prevent leaking your API key.
-
-## 🏃 How to Run
-
-Launch the application using Streamlit:
-```bash
-streamlit run prescription_reader.py
-```
-
-## ⚠️ Safety Disclaimer
-
-**MediScan AI is for educational purposes only.** 
-It is designed to help you understand your prescription, but it **cannot** provide medical diagnoses or replace professional medical advice. Always consult a qualified doctor or pharmacist before taking or changing any medication.
+> A personalized AI-powered travel planning assistant built with **Streamlit** and **Google Gemini AI**, backed by a **MySQL** database via **SQLAlchemy**.
 
 ---
-*Created with ❤️ to empower health literacy.*
+
+## 🌟 Features
+
+- 🤖 **AI-Generated Itineraries** — Uses Google Gemini 2.0 Flash to create detailed day-by-day trip plans
+- 💾 **Database Storage** — Saves user details to MySQL using SQLAlchemy ORM
+- 🎨 **Modern UI** — Clean, responsive design with custom CSS, step-based form layout
+- 🔒 **Secure Config** — API keys and DB credentials stored in `.env` (never committed to Git)
+- ✅ **Smart Validation** — Field-level error messages guide users to fill in exactly what's missing
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend / UI | [Streamlit](https://streamlit.io) |
+| AI Model | [Google Gemini 2.0 Flash](https://ai.google.dev) via `google-genai` |
+| Database ORM | [SQLAlchemy](https://www.sqlalchemy.org) |
+| DB Driver | [PyMySQL](https://pymysql.readthedocs.io) |
+| Database | MySQL |
+| Config | `python-dotenv` |
+
+---
+
+## 📁 Project Structure
+
+```
+trip_planner/
+├── trip_planner.py      # Main Streamlit app (UI + logic)
+├── .env                 # Environment variables (NOT committed)
+├── .env.example         # Template for environment variables
+├── requirements.txt     # Python dependencies
+├── .gitignore           # Files excluded from Git
+└── README.md            # You are here
+```
+
+---
+
+## ⚙️ Setup & Installation
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/your-username/trip_planner.git
+cd trip_planner
+```
+
+### 2. Create and activate a virtual environment
+
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# macOS / Linux
+python -m venv venv
+source venv/bin/activate
+```
+
+### 3. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Configure environment variables
+
+Copy the example file and fill in your credentials:
+
+```bash
+copy .env.example .env   # Windows
+cp .env.example .env     # macOS / Linux
+```
+
+Edit `.env`:
+
+```env
+GEMINI_API_KEY=your_google_gemini_api_key_here
+DATABASE_URL=mysql+pymysql://root:your_password@localhost/trip_planner
+```
+
+### 5. Set up the MySQL database
+
+```sql
+CREATE DATABASE trip_planner;
+```
+
+> The `trip_plan` table is **auto-created** by SQLAlchemy on first run — no manual schema needed.
+
+### 6. Run the app
+
+```bash
+streamlit run trip_planner.py
+```
+
+Open [http://localhost:8501](http://localhost:8501) in your browser.
+
+---
+
+## 🔑 Environment Variables
+
+| Variable | Description | Example |
+|---|---|---|
+| `GEMINI_API_KEY` | Your Google Gemini API key | `AIzaSy...` |
+| `DATABASE_URL` | SQLAlchemy connection string | `mysql+pymysql://root:pass@localhost/trip_planner` |
+
+Get your free Gemini API key at [https://aistudio.google.com](https://aistudio.google.com).
+
+---
+
+## 🗄️ Database Schema
+
+The app auto-creates the following table:
+
+```sql
+CREATE TABLE trip_plan (
+    id          INT          PRIMARY KEY AUTO_INCREMENT,
+    user_name   VARCHAR(100) NOT NULL,
+    user_email  VARCHAR(100) NOT NULL,
+    user_mobile VARCHAR(20)  NOT NULL
+);
+```
+
+---
+
+## 📸 How It Works
+
+1. **Fill in Step 1** — Enter your name, email, and mobile number
+2. **Fill in Step 2** — Enter your destination, trip duration, and total budget
+3. **Click Generate** — Gemini AI crafts a full personalised itinerary including:
+   - Day-by-day activities
+   - Accommodation recommendations
+   - Estimated costs
+   - Local food spots
+   - Travel tips
+
+---
+
+## 📦 Requirements
+
+```
+streamlit
+google-genai
+python-dotenv
+sqlalchemy
+pymysql
+```
+
+Install all with:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## 🤝 Contributing
+
+Pull requests are welcome! For major changes, please open an issue first to discuss what you'd like to change.
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](https://choosealicense.com/licenses/mit/).
+
+---
+
+> **Disclaimer:** All trip plans generated by this app are for informational purposes only. Please verify details and consult a travel agent before making any bookings.
