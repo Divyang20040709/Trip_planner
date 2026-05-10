@@ -37,12 +37,22 @@ class TripPlan(Base):
     user_mobile = Column(String(20),  nullable=False)
 
 try:
+    engine = get_engine(DB_URL)
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     db_connected = True
+    db_info = "MySQL"
 except Exception as e:
-    db_connected = False
-    db_error = str(e)
+    try:
+        SQLITE_URL = "sqlite:///trip_planner.db"
+        engine = get_engine(SQLITE_URL)
+        Base.metadata.create_all(engine)
+        Session = sessionmaker(bind=engine)
+        db_connected = True
+        db_info = "SQLite (Local Fallback)"
+    except Exception as sqlite_e:
+        db_connected = False
+        db_info = f"Error: {str(sqlite_e)}"
 
 @st.cache_resource
 def get_client(api_key):
@@ -52,7 +62,7 @@ client = get_client(GEMINI_API_KEY)
 
 def insert_user_details(user_name: str, user_email: str, user_mobile: str) -> bool:
     if not db_connected:
-        st.error(f"Could not connect to the database. Please check your DATABASE_URL. Error: {db_error}")
+        st.error(f"Database Error: {db_info}")
         return False
     session = Session()
     try:
@@ -409,5 +419,7 @@ if generate:
         """, unsafe_allow_html=True)
 
         st.success(f"✅ Plan generated for **{user_name}** · {duration} · {budget}")
+        if db_info != "MySQL":
+            st.info(f"ℹ️ Note: Using {db_info} because MySQL was unavailable.")
         st.markdown("---")
         st.markdown(plan)
