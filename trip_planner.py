@@ -13,9 +13,20 @@ st.set_page_config(
 )
 
 load_dotenv()
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-DB_URL = os.getenv("DATABASE_URL", "mysql+pymysql://root:@localhost/trip_planner")
 
+def get_secret(key, default=None):
+    if key in st.secrets:
+        return st.secrets[key]
+    return os.getenv(key, default)
+
+GEMINI_API_KEY = get_secret("GEMINI_API_KEY")
+DB_URL = get_secret("DATABASE_URL", "mysql+pymysql://root:@localhost/trip_planner")
+
+@st.cache_resource
+def get_engine(url):
+    return create_engine(url, pool_pre_ping=True)
+
+engine = get_engine(DB_URL)
 Base = declarative_base()
 
 class TripPlan(Base):
@@ -25,11 +36,24 @@ class TripPlan(Base):
     user_email  = Column(String(100), nullable=False)
     user_mobile = Column(String(20),  nullable=False)
 
-engine  = create_engine(DB_URL, pool_pre_ping=True)
-Base.metadata.create_all(engine)
-Session = sessionmaker(bind=engine)
+try:
+    Base.metadata.create_all(engine)
+    Session = sessionmaker(bind=engine)
+    db_connected = True
+except Exception as e:
+    db_connected = False
+    db_error = str(e)
+
+@st.cache_resource
+def get_client(api_key):
+    return genai.Client(api_key=api_key)
+
+client = get_client(GEMINI_API_KEY)
 
 def insert_user_details(user_name: str, user_email: str, user_mobile: str) -> bool:
+    if not db_connected:
+        st.error(f"Could not connect to the database. Please check your DATABASE_URL. Error: {db_error}")
+        return False
     session = Session()
     try:
         session.add(TripPlan(user_name=user_name, user_email=user_email, user_mobile=user_mobile))
@@ -46,7 +70,7 @@ def insert_user_details(user_name: str, user_email: str, user_mobile: str) -> bo
     finally:
         session.close()
 
-client = genai.Client(api_key=GEMINI_API_KEY)
+
 
 SYSTEM_PROMPT = """You are an intelligent trip planner chatbot.
 Your role is to help users create a personalized trip plan based on their preferences.
