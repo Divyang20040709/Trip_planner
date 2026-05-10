@@ -6,19 +6,16 @@ from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.exc import IntegrityError
 
-# ── Page config (must be first Streamlit call) ────────────────────────────────
 st.set_page_config(
     page_title="Trip Planner AI — Your Personal Travel Assistant",
     page_icon="✈️",
     layout="centered",
 )
 
-# ── Environment ───────────────────────────────────────────────────────────────
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 DB_URL = os.getenv("DATABASE_URL", "mysql+pymysql://root:@localhost/trip_planner")
 
-# ── SQLAlchemy Setup ──────────────────────────────────────────────────────────
 Base = declarative_base()
 
 class TripPlan(Base):
@@ -32,7 +29,6 @@ engine  = create_engine(DB_URL, pool_pre_ping=True)
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 
-# ── DB Helper ─────────────────────────────────────────────────────────────────
 def insert_user_details(user_name: str, user_email: str, user_mobile: str) -> bool:
     session = Session()
     try:
@@ -50,7 +46,6 @@ def insert_user_details(user_name: str, user_email: str, user_mobile: str) -> bo
     finally:
         session.close()
 
-# ── Gemini Client ─────────────────────────────────────────────────────────────
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 SYSTEM_PROMPT = """You are an intelligent trip planner chatbot.
@@ -76,38 +71,30 @@ def generate_response(destination: str, duration: str, budget: str) -> str:
         f"💰 Budget: {budget}\n\n"
         f"Make it detailed, practical, and exciting!"
     )
-    response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+    response = client.models.generate_content(model="gemini-3-flash-preview", contents=prompt)
     return response.text
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-#  DESIGN
-# ═══════════════════════════════════════════════════════════════════════════════
 st.markdown("""
 <style>
-/* ── Fonts ── */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-/* ── Reset & Base ── */
 html, body, [class*="css"], .stApp {
     font-family: 'Inter', sans-serif !important;
 }
 #MainMenu, footer, header { visibility: hidden; }
 
-/* ── Page Background ── */
 .stApp {
     background: linear-gradient(160deg, #dbeafe 0%, #ede9fe 40%, #fce7f3 100%);
     min-height: 100vh;
 }
 
-/* ── Main block padding ── */
 .block-container {
     padding-top: 1.5rem !important;
     padding-bottom: 3rem !important;
     max-width: 780px !important;
 }
 
-/* ══════════════════════ HERO ══════════════════════ */
 .hero-wrap {
     background: white;
     border-radius: 24px;
@@ -150,7 +137,6 @@ html, body, [class*="css"], .stApp {
     margin: 0;
 }
 
-/* ══════════════════════ STEP CARDS ══════════════════════ */
 .step-card {
     background: white;
     border-radius: 20px;
@@ -191,7 +177,6 @@ html, body, [class*="css"], .stApp {
     font-weight: 400;
 }
 
-/* ══════════════════════ INPUT LABELS ══════════════════════ */
 label, .stTextInput label, [data-testid="stTextInput"] label {
     color: #374151 !important;
     font-size: 0.87rem !important;
@@ -199,7 +184,6 @@ label, .stTextInput label, [data-testid="stTextInput"] label {
     margin-bottom: 4px !important;
 }
 
-/* ══════════════════════ INPUTS ══════════════════════ */
 input, textarea,
 .stTextInput input,
 [data-testid="stTextInput"] input {
@@ -228,7 +212,6 @@ input, textarea,
     font-weight: 400 !important;
 }
 
-/* ══════════════════════ BUTTON ══════════════════════ */
 .stButton > button {
     background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
     color: white !important;
@@ -250,16 +233,13 @@ input, textarea,
 }
 .stButton > button:active { transform: translateY(0) !important; }
 
-/* ══════════════════════ ALERTS ══════════════════════ */
 .stAlert {
     border-radius: 12px !important;
     font-size: 0.9rem !important;
 }
 
-/* ══════════════════════ SPINNER ══════════════════════ */
 .stSpinner > div { border-top-color: #6366f1 !important; }
 
-/* ══════════════════════ OUTPUT ══════════════════════ */
 .output-wrap {
     background: white;
     border-radius: 20px;
@@ -288,7 +268,6 @@ input, textarea,
     gap: 8px;
 }
 
-/* ══════════════════════ MISC ══════════════════════ */
 .tip-box {
     background: linear-gradient(135deg, #eff6ff, #f5f3ff);
     border: 1px solid #c7d2fe;
@@ -302,7 +281,6 @@ input, textarea,
 .tip-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
 .tip-text { color: #4338ca; font-size: 0.85rem; font-weight: 500; line-height: 1.5; }
 
-/* Markdown output text */
 .stMarkdown p, .stMarkdown li {
     color: #334155 !important;
     font-size: 0.95rem !important;
@@ -316,9 +294,6 @@ input, textarea,
 """, unsafe_allow_html=True)
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-#  HERO
-# ══════════════════════════════════════════════════════════════════════════════
 st.markdown("""
 <div class="hero-wrap">
     <span class="hero-icon">✈️</span>
@@ -329,9 +304,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-#  STEP 1 — Personal Details
-# ══════════════════════════════════════════════════════════════════════════════
 st.markdown("""
 <div class="step-card">
     <div class="step-header">
@@ -353,9 +325,6 @@ with col3:
     user_mobile = st.text_input("Mobile Number", placeholder="e.g. +91 98765 43210", key="mobile")
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-#  STEP 2 — Trip Preferences
-# ══════════════════════════════════════════════════════════════════════════════
 st.markdown("""
 <div class="step-card" style="margin-top:1.2rem">
     <div class="step-header">
@@ -376,7 +345,6 @@ with col_dur:
 
 budget = st.text_input("Total Budget", placeholder="e.g. ₹30,000 or $500 — include currency!", key="budget")
 
-# Quick-tip box
 st.markdown("""
 <div class="tip-box" style="margin-top:0.6rem">
     <span class="tip-icon">💡</span>
@@ -388,13 +356,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-#  GENERATE BUTTON
-# ══════════════════════════════════════════════════════════════════════════════
 generate = st.button("🌍  Generate My Trip Plan  →")
 
 if generate:
-    # Validation
     missing = []
     if not user_name:   missing.append("Full Name")
     if not user_email:  missing.append("Email Address")
@@ -412,7 +376,6 @@ if generate:
                 st.stop()
             plan = generate_response(destination, duration, budget)
 
-        # ── Output ────────────────────────────────────────────────────────────
         st.markdown(f"""
         <div class="output-wrap">
             <div class="output-title">
